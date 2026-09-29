@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Block Blast - Mobile Ready</title>
+    <title>Block Blast - Mobile Perfect</title>
     <style>
         :root {
             --bg-color: #1a1a2e;
@@ -27,23 +27,23 @@
         }
         h1 {
             margin: 2px 0 10px 0;
-            font-size: 24px;
-            letter-spacing: 3px;
+            font-size: 22px;
+            letter-spacing: 2px;
             color: var(--text-color);
             text-shadow: 0 0 10px var(--accent-color);
         }
         .stats-container {
             display: flex;
             justify-content: center;
-            gap: 12px;
-            margin-bottom: 12px;
+            gap: 10px;
+            margin-bottom: 10px;
         }
         .stat-box {
             background-color: var(--box-bg);
             border: 2px solid var(--border-color);
             border-radius: 8px;
-            padding: 6px 12px;
-            min-width: 80px;
+            padding: 5px 10px;
+            min-width: 70px;
             box-shadow: 0 4px 6px rgba(0,0,0,0.3);
             transition: transform 0.1s;
         }
@@ -51,13 +51,13 @@
             transform: scale(1.15);
         }
         .stat-label {
-            font-size: 10px;
+            font-size: 9px;
             text-transform: uppercase;
             color: #8da4ef;
             margin-bottom: 2px;
         }
         .stat-value {
-            font-size: 18px;
+            font-size: 16px;
             font-weight: bold;
             color: var(--accent-color);
         }
@@ -69,32 +69,35 @@
             background-color: var(--box-bg);
             border: 4px solid var(--border-color);
             border-radius: 10px;
-            box-shadow: 0 0 25px rgba(13, 255, 114, 0.2);
+            box-shadow: 0 0 20px rgba(13, 255, 114, 0.2);
             cursor: pointer;
             touch-action: none;
-            transition: background-color 0.3s, border-color 0.3s;
+            max-width: 95vw;
+            height: auto;
         }
+        /* Correção para as frases flutuantes ficarem contidas na tela */
         .floating-message {
             position: absolute;
             left: 50%;
-            top: 40%;
-            transform: translate(-50%, -50%) scale(0.3) rotate(-10deg);
-            font-size: 30px;
+            top: 45%;
+            transform: translate(-50%, -50%) scale(0.3) rotate(-5deg);
+            font-size: 22px;
             font-weight: 900;
+            width: 90%;
+            text-align: center;
             background: linear-gradient(45deg, #FFDE59, #FF0D72, #0DFF72);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            filter: drop-shadow(0 0 10px rgba(0,0,0,0.8));
+            filter: drop-shadow(0 0 10px rgba(0,0,0,0.9));
             pointer-events: none;
             transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             opacity: 0;
             z-index: 10;
-            white-space: nowrap;
         }
         .floating-message.show {
-            top: 30%;
+            top: 35%;
             opacity: 1;
-            transform: translate(-50%, -50%) scale(1.4) rotate(3deg);
+            transform: translate(-50%, -50%) scale(1.2) rotate(2deg);
         }
         .top-btn {
             position: absolute;
@@ -102,20 +105,19 @@
             background: var(--box-bg);
             border: 2px solid var(--border-color);
             border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            font-size: 18px;
+            width: 38px;
+            height: 38px;
+            font-size: 16px;
             color: #8da4ef;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
             box-shadow: 0 4px 6px rgba(0,0,0,0.3);
-            transition: transform 0.2s;
             z-index: 20;
         }
-        .settings-btn { right: 20px; }
-        .pause-btn { left: 20px; }
+        .settings-btn { right: 15px; }
+        .pause-btn { left: 15px; }
         .modal-overlay {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -130,8 +132,8 @@
             background: var(--box-bg);
             border: 3px solid var(--border-color);
             border-radius: 12px;
-            padding: 20px 25px;
-            width: 330px;
+            padding: 20px;
+            width: 300px;
             max-height: 80vh;
             overflow-y: auto;
             box-shadow: 0 0 25px rgba(0,0,0,0.5);
@@ -140,21 +142,21 @@
             text-align: left;
         }
         .modal-overlay.open .modal-content { transform: scale(1); }
-        .modal-content h2 { margin-top: 0; color: var(--accent-color); letter-spacing: 2px; font-size: 18px; text-align: center; }
+        .modal-content h2 { margin-top: 0; color: var(--accent-color); letter-spacing: 2px; font-size: 16px; text-align: center; }
         .tabs { display: flex; gap: 4px; margin-bottom: 15px; border-bottom: 2px solid var(--border-color); padding-bottom: 8px; }
-        .tab-btn { background: var(--border-color); color: #8da4ef; border: none; padding: 6px 8px; border-radius: 4px; cursor: pointer; font-size: 11px; flex: 1; font-weight: bold; }
+        .tab-btn { background: var(--border-color); color: #8da4ef; border: none; padding: 6px; border-radius: 4px; cursor: pointer; font-size: 10px; flex: 1; font-weight: bold; }
         .tab-btn.active { background: var(--accent-color); color: var(--bg-color); }
         .tab-pane { display: none; }
         .tab-pane.active { display: block; }
-        .setting-option { display: flex; justify-content: space-between; align-items: center; margin: 15px 0; font-size: 14px; }
-        .setting-option select { background: var(--border-color); color: white; border: 1px solid #8da4ef; padding: 4px 8px; border-radius: 4px; }
-        .switch { position: relative; display: inline-block; width: 45px; height: 24px; }
+        .setting-option { display: flex; justify-content: space-between; align-items: center; margin: 12px 0; font-size: 13px; }
+        .setting-option select { background: var(--border-color); color: white; border: 1px solid #8da4ef; padding: 4px; border-radius: 4px; }
+        .switch { position: relative; display: inline-block; width: 40px; height: 22px; }
         .switch input { opacity: 0; width: 0; height: 0; }
-        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: var(--border-color); transition: .3s; border-radius: 24px; }
-        .slider:before { position: absolute; content: ""; height: 16px; width: 16px; left: 4px; bottom: 4px; background-color: white; transition: .3s; border-radius: 50%; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: var(--border-color); transition: .3s; border-radius: 22px; }
+        .slider:before { position: absolute; content: ""; height: 14px; width: 14px; left: 4px; bottom: 4px; background-color: white; transition: .3s; border-radius: 50%; }
         input:checked + .slider { background-color: var(--accent-color); }
-        input:checked + .slider:before { transform: translateX(21px); }
-        .achievement-item, .stat-row, .leaderboard-row { display: flex; justify-content: space-between; align-items: center; background: var(--border-color); padding: 8px 10px; border-radius: 6px; margin-bottom: 8px; font-size: 13px; }
+        input:checked + .slider:before { transform: translateX(18px); }
+        .achievement-item, .stat-row, .leaderboard-row { display: flex; justify-content: space-between; align-items: center; background: var(--border-color); padding: 6px 8px; border-radius: 6px; margin-bottom: 6px; font-size: 12px; }
         .achievement-item.unlocked { border-left: 4px solid var(--accent-color); }
         .achievement-item.locked { opacity: 0.5; border-left: 4px solid #FF0D72; }
         .close-modal-btn { background: #FF0D72; color: white; border: none; padding: 10px; border-radius: 6px; font-weight: bold; cursor: pointer; width: 100%; margin-top: 15px; }
@@ -492,12 +494,14 @@
             return false;
         }
 
-        // Funções unificadas de Toque e Rato
+        // Funções de toque ajustadas com offset maior para o dedo não tapar a peça
         function handleStart(clientX, clientY) {
             if (isPaused) return;
             const rect = canvas.getBoundingClientRect();
-            const mouseX = clientX - rect.left;
-            const mouseY = clientY - rect.top;
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+            const mouseX = (clientX - rect.left) * scaleX;
+            const mouseY = (clientY - rect.top) * scaleY;
 
             if (mouseX >= 335 && mouseX <= 385 && mouseY >= 445 && mouseY <= 495) {
                 if (gameMode === 'infinite' && score >= 50) {
@@ -519,10 +523,10 @@
                 if (p.isPlaced) continue;
                 let pieceWidth = p.shape[0].length * TRAY_BLOCK_SIZE;
                 let pieceHeight = p.shape.length * TRAY_BLOCK_SIZE;
-                if (mouseX >= p.x && mouseX <= p.x + pieceWidth && mouseY >= p.y && mouseY <= p.y + pieceHeight) {
+                if (mouseX >= p.x - 10 && mouseX <= p.x + pieceWidth + 10 && mouseY >= p.y - 10 && mouseY <= p.y + pieceHeight + 10) {
                     draggingPiece = p;
                     dragOffsetX = (p.shape[0].length * BLOCK_SIZE) / 2;
-                    dragOffsetY = (p.shape.length * BLOCK_SIZE + 45);
+                    dragOffsetY = (p.shape.length * BLOCK_SIZE) + 60; // Desloca a peça para cima do dedo
                     break;
                 }
             }
@@ -531,8 +535,10 @@
         function handleMove(clientX, clientY) {
             if (isPaused || !draggingPiece) return;
             const rect = canvas.getBoundingClientRect();
-            draggingPiece.x = (clientX - rect.left) - dragOffsetX;
-            draggingPiece.y = (clientY - rect.top) - dragOffsetY;
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+            draggingPiece.x = ((clientX - rect.left) * scaleX) - dragOffsetX;
+            draggingPiece.y = ((clientY - rect.top) * scaleY) - dragOffsetY;
         }
 
         function handleEnd() {
@@ -577,12 +583,10 @@
             draggingPiece = null;
         }
 
-        // Eventos de Rato
         canvas.addEventListener('mousedown', (e) => handleStart(e.clientX, e.clientY));
         canvas.addEventListener('mousemove', (e) => handleMove(e.clientX, e.clientY));
         canvas.addEventListener('mouseup', () => handleEnd());
 
-        // Eventos de Toque (Mobile Touch Support)
         canvas.addEventListener('touchstart', (e) => {
             if (e.touches.length > 0) handleStart(e.touches[0].clientX, e.touches[0].clientY);
             e.preventDefault();
