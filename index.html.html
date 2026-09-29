@@ -1,0 +1,927 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Block  - Ultimate Edition + Tema Rosa</title>
+    <style>
+        :root {
+            --bg-color: #1a1a2e;
+            --box-bg: #16213e;
+            --border-color: #0f3460;
+            --text-color: #ffffff;
+            --accent-color: #0DFF72;
+            --empty-cell: #0f3460;
+        }
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            text-align: center;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin-top: 10px;
+            user-select: none; 
+            overflow: hidden;
+            transition: background-color 0.3s;
+        }
+        h1 {
+            margin: 2px 0 10px 0;
+            font-size: 24px;
+            letter-spacing: 3px;
+            color: var(--text-color);
+            text-shadow: 0 0 10px var(--accent-color);
+        }
+        .stats-container {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+        .stat-box {
+            background-color: var(--box-bg);
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            padding: 6px 12px;
+            min-width: 80px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+            transition: transform 0.1s;
+        }
+        .stat-box.pulse {
+            transform: scale(1.15);
+        }
+        .stat-label {
+            font-size: 10px;
+            text-transform: uppercase;
+            color: #8da4ef;
+            margin-bottom: 2px;
+        }
+        .stat-value {
+            font-size: 18px;
+            font-weight: bold;
+            color: var(--accent-color);
+        }
+        .canvas-wrapper {
+            position: relative;
+            display: inline-block;
+        }
+        canvas {
+            background-color: var(--box-bg);
+            border: 4px solid var(--border-color);
+            border-radius: 10px;
+            box-shadow: 0 0 25px rgba(13, 255, 114, 0.2);
+            cursor: pointer;
+            transition: background-color 0.3s, border-color 0.3s;
+        }
+        .floating-message {
+            position: absolute;
+            left: 50%;
+            top: 40%;
+            transform: translate(-50%, -50%) scale(0.3) rotate(-10deg);
+            font-size: 30px;
+            font-weight: 900;
+            background: linear-gradient(45deg, #FFDE59, #FF0D72, #0DFF72);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 0 10px rgba(0,0,0,0.8));
+            pointer-events: none;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            opacity: 0;
+            z-index: 10;
+            white-space: nowrap;
+        }
+        .floating-message.show {
+            top: 30%;
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1.4) rotate(3deg);
+        }
+        .top-btn {
+            position: absolute;
+            top: 10px;
+            background: var(--box-bg);
+            border: 2px solid var(--border-color);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            font-size: 18px;
+            color: #8da4ef;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+            transition: transform 0.2s;
+            z-index: 20;
+        }
+        .settings-btn { right: 20px; }
+        .pause-btn { left: 20px; }
+        .top-btn:hover {
+            transform: scale(1.1);
+            color: var(--accent-color);
+        }
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(26, 26, 46, 0.85);
+            display: flex; align-items: center; justify-content: center;
+            opacity: 0; pointer-events: none;
+            transition: opacity 0.3s ease;
+            z-index: 100;
+        }
+        .modal-overlay.open {
+            opacity: 1; pointer-events: auto;
+        }
+        .modal-content {
+            background: var(--box-bg);
+            border: 3px solid var(--border-color);
+            border-radius: 12px;
+            padding: 20px 25px;
+            width: 330px;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 0 25px rgba(0,0,0,0.5);
+            transform: scale(0.8);
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            text-align: left;
+        }
+        .modal-overlay.open .modal-content { transform: scale(1); }
+        .modal-content h2 {
+            margin-top: 0; color: var(--accent-color); letter-spacing: 2px; font-size: 18px; text-align: center;
+        }
+        .tabs {
+            display: flex; gap: 4px; margin-bottom: 15px; border-bottom: 2px solid var(--border-color); padding-bottom: 8px;
+        }
+        .tab-btn {
+            background: var(--border-color); color: #8da4ef; border: none; padding: 6px 8px; border-radius: 4px; cursor: pointer; font-size: 11px; flex: 1; font-weight: bold;
+        }
+        .tab-btn.active { background: var(--accent-color); color: var(--bg-color); }
+        .tab-pane { display: none; }
+        .tab-pane.active { display: block; }
+        .setting-option {
+            display: flex; justify-content: space-between; align-items: center; margin: 15px 0; font-size: 14px;
+        }
+        .setting-option select {
+            background: var(--border-color); color: white; border: 1px solid #8da4ef; padding: 4px 8px; border-radius: 4px;
+        }
+        .switch {
+            position: relative; display: inline-block; width: 45px; height: 24px;
+        }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider {
+            position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0;
+            background-color: var(--border-color); transition: .3s; border-radius: 24px;
+        }
+        .slider:before {
+            position: absolute; content: ""; height: 16px; width: 16px; left: 4px; bottom: 4px;
+            background-color: white; transition: .3s; border-radius: 50%;
+        }
+        input:checked + .slider { background-color: var(--accent-color); }
+        input:checked + .slider:before { transform: translateX(21px); }
+        
+        .achievement-item, .stat-row, .leaderboard-row {
+            display: flex; justify-content: space-between; align-items: center; background: var(--border-color); padding: 8px 10px; border-radius: 6px; margin-bottom: 8px; font-size: 13px;
+        }
+        .achievement-item.unlocked { border-left: 4px solid var(--accent-color); }
+        .achievement-item.locked { opacity: 0.5; border-left: 4px solid #FF0D72; }
+        .close-modal-btn {
+            background: #FF0D72; color: white; border: none; padding: 10px; border-radius: 6px; font-weight: bold; cursor: pointer; width: 100%; margin-top: 15px; transition: opacity 0.2s;
+        }
+        .close-modal-btn:hover { opacity: 0.85; }
+    </style>
+</head>
+<body>
+
+    <button class="top-btn pause-btn" id="pauseBtn" title="Pausar Jogo">⏸️</button>
+    <button class="top-btn settings-btn" id="openSettings" title="Configurações">⚙️</button>
+    <h1>BLOCK BLAST</h1>
+    
+    <div class="stats-container">
+        <div class="stat-box" id="scoreBox">
+            <div class="stat-label" id="scoreLabel">Pontos</div>
+            <div id="scoreDisplay" class="stat-value">0</div>
+        </div>
+        <div class="stat-box">
+            <div class="stat-label">Recorde</div>
+            <div id="highScoreDisplay" class="stat-value">0</div>
+        </div>
+        <div class="stat-box">
+            <div class="stat-label">Nível</div>
+            <div id="levelDisplay" class="stat-value">1</div>
+        </div>
+    </div>
+    
+    <div class="canvas-wrapper">
+        <div id="comboPopup" class="floating-message"></div>
+        <canvas id="gameCanvas" width="400" height="550"></canvas>
+    </div>
+
+    <!-- Modal de Configurações -->
+    <div class="modal-overlay" id="settingsModal">
+        <div class="modal-content">
+            <h2>PAINEL DE CONTROLE</h2>
+            <div class="tabs">
+                <button class="tab-btn active" data-tab="general">Geral</button>
+                <button class="tab-btn" data-tab="achievements">Troféus</button>
+                <button class="tab-btn" data-tab="stats">Estatísticas</button>
+                <button class="tab-btn" data-tab="leaderboard">Ranking</button>
+            </div>
+
+            <div class="tab-pane active" id="tab-general">
+                <div class="setting-option">
+                    <span>Efeitos Sonoros</span>
+                    <label class="switch">
+                        <input type="checkbox" id="soundToggle" checked>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                <div class="setting-option">
+                    <span>Modo de Jogo</span>
+                    <select id="gameModeSelect">
+                        <option value="infinite">Infinito</option>
+                        <option value="timeattack">Contrarrelógio (60s)</option>
+                    </select>
+                </div>
+                <div class="setting-option">
+                    <span>Tema Visual</span>
+                    <select id="themeSelect">
+                        <option value="space">Espacial Profundo</option>
+                        <option value="cyber">Neon Cibernético</option>
+                        <option value="wood">Madeira Rústica</option>
+                        <option value="pink">Rosa Kawaii 🌸</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="tab-pane" id="tab-achievements">
+                <div id="achievementsList"></div>
+            </div>
+
+            <div class="tab-pane" id="tab-stats">
+                <div class="stat-row"><span>Partidas Jogadas:</span> <strong id="statGames">0</strong></div>
+                <div class="stat-row"><span>Linhas Eliminadas:</span> <strong id="statLines">0</strong></div>
+                <div class="stat-row"><span>Maior Combo:</span> <strong id="statMaxCombo">0x</strong></div>
+                <div class="stat-row"><span>Dinamites Detonadas:</span> <strong id="statBombs">0</strong></div>
+            </div>
+
+            <div class="tab-pane" id="tab-leaderboard">
+                <div id="leaderboardList"></div>
+            </div>
+
+            <button class="close-modal-btn" id="closeSettings">SALVAR & FECHAR</button>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+
+        const BLOCK_SIZE = 45; 
+        const TRAY_BLOCK_SIZE = 25; 
+        const BOARD_OFFSET_X = 20; 
+        const BOARD_OFFSET_Y = 20;
+
+        let score = 0;
+        let level = 1;
+        let comboStreak = 0; 
+        let isGameOver = false;
+        let isPaused = false;
+        let highScore = localStorage.getItem('blockBlastHighScore') || 0;
+        let isNewHighScore = false;
+        let soundEnabled = localStorage.getItem('blockBlastSound') !== 'false';
+        let currentTheme = localStorage.getItem('blockBlastTheme') || 'space';
+        let gameMode = localStorage.getItem('blockBlastMode') || 'infinite';
+        let timeLeft = 60;
+        let timerInterval = null;
+
+        let stats = JSON.parse(localStorage.getItem('blockBlastStats')) || { games: 1, lines: 0, maxCombo: 0, bombs: 0 };
+        let leaderboard = JSON.parse(localStorage.getItem('blockBlastLeaderboard')) || [
+            { name: 'PRO', score: 2500 }, { name: 'TOP', score: 1800 }, { name: 'BOY', score: 1000 }, { name: 'NEW', score: 500 }, { name: 'YOU', score: 200 }
+        ];
+
+        let achievements = JSON.parse(localStorage.getItem('blockBlastAchievements')) || {
+            combo2: { title: 'Primeiro Combo (2x)', unlocked: false },
+            combo5: { title: 'Imparável (5x Combo)', unlocked: false },
+            score10k: { title: 'Mestre dos Blocos (10k Pts)', unlocked: false },
+            bombs10: { title: 'Demolidor (10 Bombas)', unlocked: false }
+        };
+
+        document.getElementById('soundToggle').checked = soundEnabled;
+        document.getElementById('themeSelect').value = currentTheme;
+        document.getElementById('gameModeSelect').value = gameMode;
+        document.getElementById('highScoreDisplay').innerText = highScore;
+        applyTheme(currentTheme);
+        setupGameMode();
+
+        document.getElementById('pauseBtn').addEventListener('click', () => {
+            if (isGameOver) return;
+            isPaused = !isPaused;
+            document.getElementById('pauseBtn').innerText = isPaused ? '▶️' : '⏸️';
+        });
+
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+                e.target.classList.add('active');
+                document.getElementById('tab-' + e.target.dataset.tab).classList.add('active');
+                if (e.target.dataset.tab === 'achievements') renderAchievements();
+                if (e.target.dataset.tab === 'stats') renderStats();
+                if (e.target.dataset.tab === 'leaderboard') renderLeaderboard();
+            });
+        });
+
+        const modal = document.getElementById('settingsModal');
+        document.getElementById('openSettings').addEventListener('click', () => { isPaused = true; modal.classList.add('open'); });
+        document.getElementById('closeSettings').addEventListener('click', () => {
+            soundEnabled = document.getElementById('soundToggle').checked;
+            currentTheme = document.getElementById('themeSelect').value;
+            let newMode = document.getElementById('gameModeSelect').value;
+            
+            localStorage.setItem('blockBlastSound', soundEnabled);
+            localStorage.setItem('blockBlastTheme', currentTheme);
+            
+            if (newMode !== gameMode) {
+                gameMode = newMode;
+                localStorage.setItem('blockBlastMode', gameMode);
+                setupGameMode();
+                resetGame();
+            }
+
+            applyTheme(currentTheme);
+            modal.classList.remove('open');
+            isPaused = false;
+        });
+
+        function setupGameMode() {
+            if (gameMode === 'timeattack') {
+                document.getElementById('scoreLabel').innerText = 'Tempo';
+                if (!timerInterval && !isGameOver) startTimer();
+            } else {
+                document.getElementById('scoreLabel').innerText = 'Pontos';
+                if (timerInterval) clearInterval(timerInterval);
+            }
+        }
+
+        function startTimer() {
+            timeLeft = 60;
+            if (timerInterval) clearInterval(timerInterval);
+            timerInterval = setInterval(() => {
+                if (!isGameOver && !isPaused && gameMode === 'timeattack') {
+                    timeLeft--;
+                    document.getElementById('scoreDisplay').innerText = timeLeft + 's';
+                    
+                    // Aviso sonoro rítmico nos últimos 10 segundos
+                    if (timeLeft <= 10 && timeLeft > 0) {
+                        playSound('tick');
+                    }
+
+                    if (timeLeft <= 0) {
+                        isGameOver = true;
+                        playSound('gameover');
+                        clearInterval(timerInterval);
+                    }
+                }
+            }, 1000);
+        }
+
+        function applyTheme(theme) {
+            const root = document.documentElement;
+            if (theme === 'space') {
+                root.style.setProperty('--bg-color', '#1a1a2e'); root.style.setProperty('--box-bg', '#16213e'); root.style.setProperty('--border-color', '#0f3460'); root.style.setProperty('--text-color', '#ffffff'); root.style.setProperty('--accent-color', '#0DFF72'); root.style.setProperty('--empty-cell', '#0f3460');
+            } else if (theme === 'cyber') {
+                root.style.setProperty('--bg-color', '#050505'); root.style.setProperty('--box-bg', '#111122'); root.style.setProperty('--border-color', '#FF0D72'); root.style.setProperty('--text-color', '#0DC2FF'); root.style.setProperty('--accent-color', '#FF0D72'); root.style.setProperty('--empty-cell', '#1a1a3a');
+            } else if (theme === 'wood') {
+                root.style.setProperty('--bg-color', '#2c1e11'); root.style.setProperty('--box-bg', '#3d2817'); root.style.setProperty('--border-color', '#5c3a21'); root.style.setProperty('--text-color', '#f4ebd0'); root.style.setProperty('--accent-color', '#e29578'); root.style.setProperty('--empty-cell', '#4e331c');
+            } else if (theme === 'pink') {
+                root.style.setProperty('--bg-color', '#ffe6f0'); root.style.setProperty('--box-bg', '#ffb6c1'); root.style.setProperty('--border-color', '#ff69b4'); root.style.setProperty('--text-color', '#4a0e2e'); root.style.setProperty('--accent-color', '#ff1493'); root.style.setProperty('--empty-cell', '#ffc0cb');
+            }
+        }
+
+        function renderAchievements() {
+            const list = document.getElementById('achievementsList');
+            list.innerHTML = '';
+            for (let key in achievements) {
+                let ach = achievements[key];
+                list.innerHTML += `<div class="achievement-item ${ach.unlocked ? 'unlocked' : 'locked'}"><span>${ach.title}</span><span>${ach.unlocked ? '🏆' : '🔒'}</span></div>`;
+            }
+        }
+
+        function renderStats() {
+            document.getElementById('statGames').innerText = stats.games;
+            document.getElementById('statLines').innerText = stats.lines;
+            document.getElementById('statMaxCombo').innerText = stats.maxCombo + 'x';
+            document.getElementById('statBombs').innerText = stats.bombs;
+        }
+
+        function renderLeaderboard() {
+            const list = document.getElementById('leaderboardList');
+            list.innerHTML = '';
+            leaderboard.sort((a,b) => b.score - a.score);
+            leaderboard.forEach((entry, idx) => {
+                list.innerHTML += `<div class="leaderboard-row"><span>#${idx+1} ${entry.name}</span><strong>${entry.score} pts</strong></div>`;
+            });
+        }
+
+        function updateLeaderboard(finalScore) {
+            leaderboard.push({ name: 'YOU', score: finalScore });
+            leaderboard.sort((a,b) => b.score - a.score);
+            leaderboard = leaderboard.slice(0, 5);
+            localStorage.setItem('blockBlastLeaderboard', JSON.stringify(leaderboard));
+        }
+
+        function checkAchievements() {
+            if (comboStreak >= 2 && !achievements.combo2.unlocked) { achievements.combo2.unlocked = true; showPopupMessage("CONQUISTA: Primeiro Combo!"); }
+            if (comboStreak >= 5 && !achievements.combo5.unlocked) { achievements.combo5.unlocked = true; showPopupMessage("CONQUISTA: Imparável!"); }
+            if (score >= 10000 && !achievements.score10k.unlocked) { achievements.score10k.unlocked = true; showPopupMessage("CONQUISTA: Mestre dos Blocos!"); }
+            if (stats.bombs >= 10 && !achievements.bombs10.unlocked) { achievements.bombs10.unlocked = true; showPopupMessage("CONQUISTA: Demolidor!"); }
+            localStorage.setItem('blockBlastAchievements', JSON.stringify(achievements));
+        }
+
+        let audioCtx = null;
+        function playSound(type) {
+            if (!soundEnabled) return;
+            try {
+                if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                if (audioCtx.state === 'suspended') audioCtx.resume();
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain); gain.connect(audioCtx.destination);
+                let now = audioCtx.currentTime;
+
+                if (type === 'place') {
+                    osc.frequency.setValueAtTime(300, now); osc.frequency.exponentialRampToValueAtTime(150, now + 0.08);
+                    gain.gain.setValueAtTime(0.15, now); gain.gain.linearRampToValueAtTime(0.01, now + 0.08);
+                    osc.start(now); osc.stop(now + 0.08);
+                } else if (type === 'clear') {
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(440, now); osc.frequency.exponentialRampToValueAtTime(880, now + 0.2);
+                    gain.gain.setValueAtTime(0.2, now); gain.gain.linearRampToValueAtTime(0.01, now + 0.2);
+                    osc.start(now); osc.stop(now + 0.2);
+                } else if (type === 'tick') {
+                    osc.type = 'square';
+                    osc.frequency.setValueAtTime(600, now);
+                    gain.gain.setValueAtTime(0.1, now); gain.gain.linearRampToValueAtTime(0.01, now + 0.05);
+                    osc.start(now); osc.stop(now + 0.05);
+                } else if (type === 'bomb') {
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(120, now); osc.frequency.linearRampToValueAtTime(40, now + 0.3);
+                    gain.gain.setValueAtTime(0.3, now); gain.gain.linearRampToValueAtTime(0.01, now + 0.3);
+                    osc.start(now); osc.stop(now + 0.3);
+                } else if (type === 'gameover') {
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(200, now); osc.frequency.linearRampToValueAtTime(80, now + 0.5);
+                    gain.gain.setValueAtTime(0.25, now); gain.gain.linearRampToValueAtTime(0.01, now + 0.5);
+                    osc.start(now); osc.stop(now + 0.5);
+                }
+            } catch(e) {}
+        }
+
+        let particles = [];
+        let flashingCells = []; 
+
+        class Particle {
+            constructor(x, y, color) {
+                this.x = x; this.y = y; this.color = color;
+                this.size = Math.random() * 6 + 4;
+                this.speedX = (Math.random() - 0.5) * 12; this.speedY = (Math.random() - 0.5) * 12;
+                this.gravity = 0.45; this.alpha = 1; this.decay = Math.random() * 0.03 + 0.02;
+            }
+            update() { this.x += this.speedX; this.y += this.speedY; this.speedY += this.gravity; this.alpha -= this.decay; }
+            draw() { ctx.save(); ctx.globalAlpha = Math.max(0, this.alpha); ctx.fillStyle = this.color; ctx.fillRect(this.x, this.y, this.size, this.size); ctx.restore(); }
+        }
+
+        const JEWEL_COLORS = [
+            null,
+            { id: 1, main: '#FF0D72', light: '#FF66B2', dark: '#B30050', style: 'gem' },       
+            { id: 2, main: '#0DC2FF', light: '#66E0FF', dark: '#0088B3', style: 'cyber' },     
+            { id: 3, main: '#0DFF72', light: '#66FFB2', dark: '#00B350', style: 'neon' },      
+            { id: 4, main: '#FFE138', light: '#FFEE80', dark: '#C2A300', style: 'gold' },      
+            { id: 5, main: '#9933FF', light: '#CC99FF', dark: '#6600CC', style: 'pyramid' },   
+            { id: 6, main: '#FF8E0D', light: '#FFB866', dark: '#B35D00', style: 'glass' }      
+        ];
+
+        const EASY_SHAPES = [[[1]], [[1, 1], [1, 1]], [[1, 1]], [[1], [1]]];
+        const MEDIUM_SHAPES = [[[1, 1, 1]], [[1], [1], [1]], [[1, 1], [1, 0]], [[1, 1], [0, 1]], [[1, 0], [1, 1]], [[0, 1], [1, 1]], [[1, 1, 1], [1, 1, 1], [1, 1, 1]]];
+        const HARD_SHAPES = [[[1, 1, 1, 1]], [[1], [1], [1], [1]], [[1, 1, 1, 1, 1]], [[1], [1], [1], [1], [1]], [[1, 1, 1], [1, 0, 0], [1, 0, 0]], [[1, 1, 1], [0, 0, 1], [0, 0, 1]], [[1, 1, 1], [0, 1, 0], [0, 1, 0]], [[0, 1, 0], [1, 1, 1], [0, 1, 0]], [[1, 1, 0], [0, 1, 1]], [[0, 1], [1, 1], [1, 0]]];
+
+        function getShapesForLevel() {
+            if (level <= 1) return EASY_SHAPES;
+            if (level <= 3) return [...EASY_SHAPES, ...MEDIUM_SHAPES];
+            return [...EASY_SHAPES, ...MEDIUM_SHAPES, ...HARD_SHAPES];
+        }
+
+        function createGrid(size) {
+            const grid = [];
+            for (let i = 0; i < size; i++) grid.push(new Array(size).fill(0));
+            return grid;
+        }
+        let board = createGrid(8);
+
+        let trayPieces = [];
+        let draggingPiece = null; 
+        let dragOffsetX = 0; let dragOffsetY = 0; 
+
+        function generateTrayPieces() {
+            trayPieces = [];
+            const availableShapes = getShapesForLevel();
+            for (let i = 0; i < 3; i++) {
+                const randomShape = availableShapes[Math.floor(Math.random() * availableShapes.length)];
+                const randomColorIndex = Math.floor(Math.random() * (JEWEL_COLORS.length - 1)) + 1;
+                const hasBomb = Math.random() < 0.15;
+
+                let piecePixelWidth = randomShape[0].length * TRAY_BLOCK_SIZE;
+                let slotCenter = ((canvas.width - 60) / 3) * i + ((canvas.width - 60) / 6);
+                let startX = slotCenter - (piecePixelWidth / 2);
+
+                trayPieces.push({ shape: randomShape, colorIndex: randomColorIndex, isBomb: hasBomb, homeX: startX, homeY: 430, x: startX, y: 430, isPlaced: false });
+            }
+            saveGame();
+        }
+
+        function saveGame() {
+            localStorage.setItem('blockBlastSave', JSON.stringify({ board, score, level, comboStreak, highScore, trayPieces, gameMode, timeLeft }));
+        }
+
+        function loadGame() {
+            const saved = localStorage.getItem('blockBlastSave');
+            if (saved) {
+                try {
+                    const data = JSON.parse(saved);
+                    board = data.board; score = data.score; level = data.level; comboStreak = data.comboStreak; highScore = data.highScore || highScore; trayPieces = data.trayPieces; gameMode = data.gameMode || 'infinite'; timeLeft = data.timeLeft || 60;
+                    document.getElementById('gameModeSelect').value = gameMode;
+                    setupGameMode();
+                    if (gameMode === 'timeattack') document.getElementById('scoreDisplay').innerText = timeLeft + 's';
+                    else document.getElementById('scoreDisplay').innerText = score;
+                    document.getElementById('levelDisplay').innerText = level;
+                    document.getElementById('highScoreDisplay').innerText = highScore;
+                    return true;
+                } catch(e) { return false; }
+            }
+            return false;
+        }
+
+        const mouse = { x: 0, y: 0, isDown: false };
+
+        canvas.addEventListener('mousedown', (e) => {
+            if (isPaused || isGameOver) return;
+            const rect = canvas.getBoundingClientRect();
+            const mouseX = e.clientX - rect.left;
+            const mouseY = e.clientY - rect.top;
+
+            if (mouseX >= 335 && mouseX <= 385 && mouseY >= 445 && mouseY <= 495) {
+                if (gameMode === 'infinite' && score >= 50) {
+                    score -= 50; document.getElementById('scoreDisplay').innerText = score;
+                    generateTrayPieces(); showPopupMessage("PEÇAS RECRIADAS! -50 Pts");
+                } else if (gameMode === 'timeattack') {
+                    showPopupMessage("INDISPONÍVEL NO MODO 60S!");
+                } else { showPopupMessage("PONTOS INSUFICIENTES!"); }
+                return;
+            }
+
+            if (isGameOver) {
+                if (mouseX >= 100 && mouseX <= 300 && mouseY >= 310 && mouseY <= 360) resetGame();
+                return;
+            }
+
+            mouse.isDown = true;
+            for (let i = trayPieces.length - 1; i >= 0; i--) {
+                let p = trayPieces[i];
+                if (p.isPlaced) continue;
+                let pieceWidth = p.shape[0].length * TRAY_BLOCK_SIZE;
+                let pieceHeight = p.shape.length * TRAY_BLOCK_SIZE;
+                if (mouseX >= p.x && mouseX <= p.x + pieceWidth && mouseY >= p.y && mouseY <= p.y + pieceHeight) {
+                    draggingPiece = p;
+                    dragOffsetX = (p.shape[0].length * BLOCK_SIZE) / 2;
+                    dragOffsetY = (p.shape.length * BLOCK_SIZE + 45);
+                    break;
+                }
+            }
+        });
+
+        canvas.addEventListener('mousemove', (e) => {
+            if (isPaused) return;
+            const rect = canvas.getBoundingClientRect();
+            mouse.x = e.clientX - rect.left; mouse.y = e.clientY - rect.top;
+            if (draggingPiece) { draggingPiece.x = mouse.x - dragOffsetX; draggingPiece.y = mouse.y - dragOffsetY; }
+        });
+
+        canvas.addEventListener('mouseup', () => {
+            if (isPaused) return;
+            mouse.isDown = false;
+            if (draggingPiece) {
+                let gridX = Math.round((draggingPiece.x - BOARD_OFFSET_X) / BLOCK_SIZE);
+                let gridY = Math.round((draggingPiece.y - BOARD_OFFSET_Y) / BLOCK_SIZE);
+
+                if (canPlacePiece(draggingPiece.shape, gridX, gridY)) {
+                    for (let y = 0; y < draggingPiece.shape.length; y++) {
+                        for (let x = 0; x < draggingPiece.shape[y].length; x++) {
+                            if (draggingPiece.shape[y][x] === 1) {
+                                board[gridY + y][gridX + x] = draggingPiece.colorIndex;
+                            }
+                        }
+                    }
+
+                    if (draggingPiece.isBomb) {
+                        playSound('bomb');
+                        stats.bombs++;
+                        for (let dy = -1; dy <= 1; dy++) {
+                            for (let dx = -1; dx <= 1; dx++) {
+                                let bx = gridX + dx, by = gridY + dy;
+                                if (bx >= 0 && bx < 8 && by >= 0 && by < 8) {
+                                    board[by][bx] = 0;
+                                    spawnParticles(BOARD_OFFSET_X + bx * BLOCK_SIZE + BLOCK_SIZE/2, BOARD_OFFSET_Y + by * BLOCK_SIZE + BLOCK_SIZE/2, '#FF5722');
+                                }
+                            }
+                        }
+                        showPopupMessage("BOOM! DINAMITE DETONADA 💣");
+                        checkAchievements();
+                    }
+
+                    draggingPiece.isPlaced = true;
+                    playSound('place');
+                    addScore(draggingPiece.shape.flat().reduce((a, b) => a + b, 0)); 
+                    checkAndClearLines(); 
+
+                    if (trayPieces.every(p => p.isPlaced)) generateTrayPieces();
+                    checkGameOver();
+                    saveGame();
+                } else {
+                    draggingPiece.x = draggingPiece.homeX; draggingPiece.y = draggingPiece.homeY;
+                }
+                draggingPiece = null;
+            }
+        });
+
+        function addScore(points) {
+            if (gameMode === 'timeattack') {
+                timeLeft += 3;
+                document.getElementById('scoreDisplay').innerText = timeLeft + 's';
+                return;
+            }
+
+            score += points;
+            let calculatedLevel = 1, pointsNeeded = 50, accumulatedPoints = 50;
+            while (score >= accumulatedPoints) { calculatedLevel++; pointsNeeded *= 2; accumulatedPoints += pointsNeeded; }
+            level = calculatedLevel;
+
+            if (score > highScore) {
+                if (!isNewHighScore && highScore > 0) showPopupMessage("NOVO RECORDE! 🏆");
+                highScore = score; isNewHighScore = true;
+                localStorage.setItem('blockBlastHighScore', highScore);
+                document.getElementById('highScoreDisplay').innerText = highScore;
+            }
+            document.getElementById('scoreDisplay').innerText = score;
+            document.getElementById('levelDisplay').innerText = level;
+            const box = document.getElementById('scoreBox');
+            box.classList.add('pulse'); setTimeout(() => box.classList.remove('pulse'), 100);
+            checkAchievements();
+        }
+
+        const messagesSingle = ["BOA!", "MANDOU BEM!", "ISSO AÍ!", "SHOW!", "PERFEITO!"];
+        const messagesDouble = ["DUPLO EXPLOSIVO!", "MUITO BOM!", "ESTÁ VOANDO!"];
+        const messagesMega = ["LENDÁRIO! 🌟", "MEGA COMBO! 🔥", "DESTRUIÇÃO TOTAL! 💥"];
+
+        function showPopupMessage(text) {
+            const popup = document.getElementById('comboPopup');
+            popup.innerText = text; popup.classList.add('show');
+            setTimeout(() => popup.classList.remove('show'), 900);
+        }
+
+        function canPlacePiece(shape, gridX, gridY) {
+            for (let y = 0; y < shape.length; y++) {
+                for (let x = 0; x < shape[y].length; x++) {
+                    if (shape[y][x] === 1) {
+                        let targetX = gridX + x, targetY = gridY + y;
+                        if (targetX < 0 || targetX >= 8 || targetY < 0 || targetY >= 8) return false;
+                        if (board[targetY][targetX] !== 0) return false;
+                    }
+                }
+            }
+            return true;
+        }
+
+        function checkAndClearLines() {
+            let rowsToClear = [], colsToClear = [];
+            for (let y = 0; y < 8; y++) if (board[y].every(cell => cell !== 0)) rowsToClear.push(y);
+            for (let x = 0; x < 8; x++) {
+                let isColFull = true; for (let y = 0; y < 8; y++) if (board[y][x] === 0) { isColFull = false; break; }
+                if (isColFull) colsToClear.push(x);
+            }
+
+            let linesCleared = rowsToClear.length + colsToClear.length;
+            if (linesCleared > 0) {
+                comboStreak++;
+                let bonusPoints = linesCleared * 30 * linesCleared * comboStreak;
+                
+                if (gameMode === 'timeattack') {
+                    timeLeft += linesCleared * 5;
+                    showPopupMessage(`+${linesCleared * 5}s DE TEMPO! ⏱️`);
+                } else {
+                    addScore(bonusPoints);
+                }
+
+                playSound('clear');
+                stats.lines += linesCleared;
+                if (comboStreak > stats.maxCombo) stats.maxCombo = comboStreak;
+                localStorage.setItem('blockBlastStats', JSON.stringify(stats));
+
+                rowsToClear.forEach(y => { for (let x = 0; x < 8; x++) if (!flashingCells.some(c => c.x === x && c.y === y)) flashingCells.push({x, y}); });
+                colsToClear.forEach(x => { for (let y = 0; y < 8; y++) if (!flashingCells.some(c => c.x === x && c.y === y)) flashingCells.push({x, y}); });
+
+                setTimeout(() => {
+                    let allTargets = [...rowsToClear.map(y => ({type: 'row', index: y})), ...colsToClear.map(x => ({type: 'col', index: x}))];
+                    allTargets.forEach((target, index) => {
+                        setTimeout(() => {
+                            let partColor = comboStreak >= 3 ? '#FF5722' : '#0DFF72';
+                            if (target.type === 'row') {
+                                for (let x = 0; x < 8; x++) { spawnParticles(BOARD_OFFSET_X + x * BLOCK_SIZE + BLOCK_SIZE/2, BOARD_OFFSET_Y + target.index * BLOCK_SIZE + BLOCK_SIZE/2, partColor); board[target.index][x] = 0; }
+                            } else {
+                                for (let y = 0; y < 8; y++) { spawnParticles(BOARD_OFFSET_X + target.index * BLOCK_SIZE + BLOCK_SIZE/2, BOARD_OFFSET_Y + y * BLOCK_SIZE + BLOCK_SIZE/2, partColor); board[y][target.index] = 0; }
+                            }
+                        }, index * 80);
+                    });
+                    setTimeout(() => { flashingCells = []; }, allTargets.length * 80 + 50);
+                }, 120);
+
+                let chosenMsg = linesCleared === 1 ? messagesSingle[Math.floor(Math.random()*messagesSingle.length)] : messagesMega[Math.floor(Math.random()*messagesMega.length)];
+                if (gameMode === 'infinite') showPopupMessage(comboStreak > 1 ? `${chosenMsg} (Combo x${comboStreak}) 🔥` : `${chosenMsg} +${bonusPoints}`);
+                checkAchievements();
+            } else { comboStreak = 0; }
+        }
+
+        function spawnParticles(x, y, color = '#0DFF72') {
+            for (let i = 0; i < 8; i++) particles.push(new Particle(x, y, color));
+        }
+
+        function checkGameOver() {
+            let canPlaceAny = false;
+            for (let p of trayPieces) {
+                if (p.isPlaced) continue;
+                for (let y = 0; y < 8; y++) {
+                    for (let x = 0; x < 8; x++) { if (canPlacePiece(p.shape, x, y)) { canPlaceAny = true; break; } }
+                    if (canPlaceAny) break;
+                }
+                if (canPlaceAny) break;
+            }
+            if (!canPlaceAny || (gameMode === 'timeattack' && timeLeft <= 0)) {
+                isGameOver = true; playSound('gameover');
+                localStorage.removeItem('blockBlastSave');
+                if (timerInterval) clearInterval(timerInterval);
+                stats.games++; localStorage.setItem('blockBlastStats', JSON.stringify(stats));
+                if (gameMode === 'infinite') updateLeaderboard(score);
+            }
+        }
+
+        function resetGame() {
+            localStorage.removeItem('blockBlastSave');
+            board = createGrid(8); score = 0; level = 1; comboStreak = 0; isGameOver = false; isNewHighScore = false; isPaused = false;
+            if (gameMode === 'timeattack') startTimer();
+            else document.getElementById('scoreDisplay').innerText = score;
+            document.getElementById('levelDisplay').innerText = level;
+            stats.games++; localStorage.setItem('blockBlastStats', JSON.stringify(stats));
+            generateTrayPieces();
+        }
+
+        function drawThemedBlock(x, y, size, col, isBomb = false, isFlash = false) {
+            if (isFlash) { ctx.fillStyle = '#FFFFFF'; ctx.fillRect(x, y, size, size); return; }
+            const theme = JEWEL_COLORS[col]; if (!theme) return;
+            ctx.fillStyle = theme.dark; ctx.fillRect(x, y, size, size);
+            ctx.fillStyle = theme.main; ctx.fillRect(x + 2, y + 2, size - 4, size - 4);
+            
+            if (isBomb) {
+                ctx.fillStyle = '#111111';
+                ctx.beginPath(); ctx.arc(x + size/2, y + size/2, 10, 0, Math.PI*2); ctx.fill();
+                ctx.fillStyle = '#FF5722'; ctx.font = 'bold 12px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('💣', x + size/2, y + size/2);
+                return;
+            }
+
+            if (theme.style === 'gem') {
+                ctx.fillStyle = theme.light; ctx.beginPath(); ctx.moveTo(x + size/2, y + 4); ctx.lineTo(x + size - 4, y + size/2); ctx.lineTo(x + size/2, y + size - 4); ctx.lineTo(x + 4, y + size/2); ctx.closePath(); ctx.fill();
+                ctx.fillStyle = '#FFFFFF'; ctx.fillRect(x + size/2 - 2, y + size/2 - 2, 4, 4);
+            } else if (theme.style === 'cyber') {
+                ctx.strokeStyle = theme.light; ctx.lineWidth = 2; ctx.strokeRect(x + 5, y + 5, size - 10, size - 10);
+                ctx.fillStyle = '#FFFFFF'; ctx.fillRect(x + size/2 - 3, y + size/2 - 3, 6, 6);
+            } else if (theme.style === 'neon') {
+                ctx.fillStyle = theme.light; ctx.fillRect(x + 4, y + 4, size - 8, size - 8);
+                ctx.fillStyle = theme.main; ctx.fillRect(x + 8, y + 8, size - 16, size - 16);
+                ctx.fillStyle = '#FFFFFF'; ctx.fillRect(x + 6, y + 6, 3, 3);
+            } else if (theme.style === 'gold') {
+                ctx.fillStyle = theme.light; ctx.beginPath(); ctx.moveTo(x + 2, y + 2); ctx.lineTo(x + size - 2, y + 2); ctx.lineTo(x + 2, y + size - 2); ctx.closePath(); ctx.fill();
+                ctx.fillStyle = '#FFFFFF'; ctx.fillRect(x + size - 8, y + 8, 4, 4);
+            } else if (theme.style === 'pyramid') {
+                ctx.fillStyle = theme.light; ctx.fillRect(x + 6, y + 6, size - 12, size - 12);
+                ctx.fillStyle = theme.dark; ctx.fillRect(x + 12, y + 12, size - 24, size - 24);
+                ctx.fillStyle = '#FFFFFF'; ctx.fillRect(x + size/2 - 2, y + size/2 - 2, 4, 4);
+            } else if (theme.style === 'glass') {
+                ctx.fillStyle = theme.light; ctx.fillRect(x + 3, y + 3, size - 6, 5); ctx.fillRect(x + 3, y + 3, 5, size - 6);
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.4)'; ctx.fillRect(x + size/2, y + size/2, 8, 8);
+            }
+        }
+
+        function drawBoard() {
+            let tempBoard = board.map(row => [...row]);
+            let targetRowsToClear = [], targetColsToClear = [];
+
+            if (draggingPiece) {
+                let gridX = Math.round((draggingPiece.x - BOARD_OFFSET_X) / BLOCK_SIZE);
+                let gridY = Math.round((draggingPiece.y - BOARD_OFFSET_Y) / BLOCK_SIZE);
+                if (canPlacePiece(draggingPiece.shape, gridX, gridY)) {
+                    for (let y = 0; y < draggingPiece.shape.length; y++) {
+                        for (let x = 0; x < draggingPiece.shape[y].length; x++) {
+                            if (draggingPiece.shape[y][x] === 1) tempBoard[gridY + y][gridX + x] = draggingPiece.colorIndex;
+                        }
+                    }
+                    for (let y = 0; y < 8; y++) if (tempBoard[y].every(cell => cell !== 0)) targetRowsToClear.push(y);
+                    for (let x = 0; x < 8; x++) {
+                        let isFull = true; for (let y = 0; y < 8; y++) if (tempBoard[y][x] === 0) { isFull = false; break; }
+                        if (isFull) targetColsToClear.push(x);
+                    }
+                }
+            }
+
+            ctx.save();
+            // Combo Streak Multicor (Arco-Íris se combo >= 3)
+            if (comboStreak >= 3) {
+                let hue = (Date.now() / 10) % 360;
+                ctx.fillStyle = `hsla(${hue}, 100%, 50%, 0.4)`;
+            } else {
+                ctx.fillStyle = comboStreak >= 2 ? 'rgba(255, 87, 34, 0.4)' : 'rgba(255, 222, 89, 0.35)';
+            }
+            targetRowsToClear.forEach(y => ctx.fillRect(BOARD_OFFSET_X, BOARD_OFFSET_Y + y * BLOCK_SIZE, 8 * BLOCK_SIZE, BLOCK_SIZE));
+            targetColsToClear.forEach(x => ctx.fillRect(BOARD_OFFSET_X + x * BLOCK_SIZE, BOARD_OFFSET_Y, BLOCK_SIZE, 8 * BLOCK_SIZE));
+            ctx.restore();
+
+            for (let y = 0; y < 8; y++) {
+                for (let x = 0; x < 8; x++) {
+                    const px = BOARD_OFFSET_X + x * BLOCK_SIZE, py = BOARD_OFFSET_Y + y * BLOCK_SIZE;
+                    let isFlash = flashingCells.some(c => c.x === x && c.y === y);
+                    if (board[y][x] === 0) {
+                        ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--empty-cell');
+                        ctx.fillRect(px, py, BLOCK_SIZE - 2, BLOCK_SIZE - 2);
+                    } else { drawThemedBlock(px, py, BLOCK_SIZE - 2, board[y][x], false, isFlash); }
+                }
+            }
+        }
+
+        function drawTrayBackground() {
+            ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--bg-color');
+            ctx.fillRect(0, 400, canvas.width, 150);
+            ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--box-bg');
+            ctx.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue('--border-color');
+            ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(360, 465, 23, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+            ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--accent-color'); ctx.font = '18px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('🔄', 360, 460);
+            ctx.fillStyle = '#8da4ef'; ctx.font = '9px sans-serif'; ctx.fillText('50 pts', 360, 493);
+        }
+
+        function drawTrayPieces() {
+            trayPieces.forEach(p => {
+                if (p.isPlaced) return;
+                let isDragging = (draggingPiece === p);
+                let currentSize = isDragging ? BLOCK_SIZE : TRAY_BLOCK_SIZE;
+                if (isDragging) { ctx.save(); ctx.shadowColor = 'rgba(0, 0, 0, 0.6)'; ctx.shadowBlur = 15; ctx.shadowOffsetX = 5; ctx.shadowOffsetY = 10; }
+                for (let y = 0; y < p.shape.length; y++) {
+                    for (let x = 0; x < p.shape[y].length; x++) {
+                        if (p.shape[y][x] === 1) drawThemedBlock(p.x + (x * currentSize), p.y + (y * currentSize), currentSize - 2, p.colorIndex, p.isBomb);
+                    }
+                }
+                if (isDragging) ctx.restore();
+            });
+        }
+
+        function drawPauseScreen() {
+            ctx.save(); ctx.fillStyle = 'rgba(26, 26, 46, 0.85)'; ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = '#FF0D72'; ctx.font = 'bold 28px sans-serif'; ctx.textAlign = 'center'; ctx.fillText('JOGO PAUSADO', canvas.width / 2, canvas.height / 2 - 15);
+            ctx.fillStyle = '#ffffff'; ctx.font = '14px sans-serif'; ctx.fillText('Clique em ⏸️ ou ⚙️ para continuar', canvas.width / 2, canvas.height / 2 + 20);
+            ctx.restore();
+        }
+
+        function drawGameOverScreen() {
+            ctx.save(); ctx.fillStyle = 'rgba(26, 26, 46, 0.85)'; ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--box-bg');
+            ctx.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue('--border-color');
+            ctx.lineWidth = 4; ctx.fillRect(50, 150, 300, 250); ctx.strokeRect(50, 150, 300, 250);
+            ctx.fillStyle = '#FF0D72'; ctx.font = 'bold 26px sans-serif'; ctx.textAlign = 'center'; ctx.fillText('FIM DE JOGO', canvas.width / 2, 200);
+            ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--text-color'); ctx.font = '16px sans-serif'; ctx.fillText(gameMode === 'timeattack' ? 'Tempo Esgotado!' : `Pontuação Final: ${score}`, canvas.width / 2, 245);
+            ctx.fillText(`Recorde: ${highScore}`, canvas.width / 2, 275);
+            ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--accent-color'); ctx.fillRect(100, 310, 200, 50);
+            ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--bg-color'); ctx.font = 'bold 16px sans-serif'; ctx.fillText('JOGAR NOVAMENTE', canvas.width / 2, 340);
+            ctx.restore();
+        }
+
+        function render() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            drawTrayBackground(); drawBoard(); drawTrayPieces();
+            for (let i = particles.length - 1; i >= 0; i--) { particles[i].update(); particles[i].draw(); if (particles[i].alpha <= 0) particles.splice(i, 1); }
+            if (isPaused) drawPauseScreen();
+            if (isGameOver) drawGameOverScreen();
+            requestAnimationFrame(render);
+        }
+
+        if (!loadGame()) {
+            if (gameMode === 'timeattack') startTimer();
+            generateTrayPieces();
+        } else {
+            if (gameMode === 'timeattack') startTimer();
+        }
+        render();
+    </script>
+</body>
+</html>
