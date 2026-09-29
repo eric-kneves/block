@@ -2,8 +2,8 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Block  - Ultimate Edition + Tema Rosa</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Block Blast - Mobile Ready</title>
     <style>
         :root {
             --bg-color: #1a1a2e;
@@ -18,9 +18,11 @@
             color: var(--text-color);
             text-align: center;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            margin-top: 10px;
+            margin: 0;
+            padding-top: 10px;
             user-select: none; 
             overflow: hidden;
+            touch-action: none;
             transition: background-color 0.3s;
         }
         h1 {
@@ -69,6 +71,7 @@
             border-radius: 10px;
             box-shadow: 0 0 25px rgba(13, 255, 114, 0.2);
             cursor: pointer;
+            touch-action: none;
             transition: background-color 0.3s, border-color 0.3s;
         }
         .floating-message {
@@ -113,10 +116,6 @@
         }
         .settings-btn { right: 20px; }
         .pause-btn { left: 20px; }
-        .top-btn:hover {
-            transform: scale(1.1);
-            color: var(--accent-color);
-        }
         .modal-overlay {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -126,9 +125,7 @@
             transition: opacity 0.3s ease;
             z-index: 100;
         }
-        .modal-overlay.open {
-            opacity: 1; pointer-events: auto;
-        }
+        .modal-overlay.open { opacity: 1; pointer-events: auto; }
         .modal-content {
             background: var(--box-bg);
             border: 3px solid var(--border-color);
@@ -143,54 +140,30 @@
             text-align: left;
         }
         .modal-overlay.open .modal-content { transform: scale(1); }
-        .modal-content h2 {
-            margin-top: 0; color: var(--accent-color); letter-spacing: 2px; font-size: 18px; text-align: center;
-        }
-        .tabs {
-            display: flex; gap: 4px; margin-bottom: 15px; border-bottom: 2px solid var(--border-color); padding-bottom: 8px;
-        }
-        .tab-btn {
-            background: var(--border-color); color: #8da4ef; border: none; padding: 6px 8px; border-radius: 4px; cursor: pointer; font-size: 11px; flex: 1; font-weight: bold;
-        }
+        .modal-content h2 { margin-top: 0; color: var(--accent-color); letter-spacing: 2px; font-size: 18px; text-align: center; }
+        .tabs { display: flex; gap: 4px; margin-bottom: 15px; border-bottom: 2px solid var(--border-color); padding-bottom: 8px; }
+        .tab-btn { background: var(--border-color); color: #8da4ef; border: none; padding: 6px 8px; border-radius: 4px; cursor: pointer; font-size: 11px; flex: 1; font-weight: bold; }
         .tab-btn.active { background: var(--accent-color); color: var(--bg-color); }
         .tab-pane { display: none; }
         .tab-pane.active { display: block; }
-        .setting-option {
-            display: flex; justify-content: space-between; align-items: center; margin: 15px 0; font-size: 14px;
-        }
-        .setting-option select {
-            background: var(--border-color); color: white; border: 1px solid #8da4ef; padding: 4px 8px; border-radius: 4px;
-        }
-        .switch {
-            position: relative; display: inline-block; width: 45px; height: 24px;
-        }
+        .setting-option { display: flex; justify-content: space-between; align-items: center; margin: 15px 0; font-size: 14px; }
+        .setting-option select { background: var(--border-color); color: white; border: 1px solid #8da4ef; padding: 4px 8px; border-radius: 4px; }
+        .switch { position: relative; display: inline-block; width: 45px; height: 24px; }
         .switch input { opacity: 0; width: 0; height: 0; }
-        .slider {
-            position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0;
-            background-color: var(--border-color); transition: .3s; border-radius: 24px;
-        }
-        .slider:before {
-            position: absolute; content: ""; height: 16px; width: 16px; left: 4px; bottom: 4px;
-            background-color: white; transition: .3s; border-radius: 50%;
-        }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: var(--border-color); transition: .3s; border-radius: 24px; }
+        .slider:before { position: absolute; content: ""; height: 16px; width: 16px; left: 4px; bottom: 4px; background-color: white; transition: .3s; border-radius: 50%; }
         input:checked + .slider { background-color: var(--accent-color); }
         input:checked + .slider:before { transform: translateX(21px); }
-        
-        .achievement-item, .stat-row, .leaderboard-row {
-            display: flex; justify-content: space-between; align-items: center; background: var(--border-color); padding: 8px 10px; border-radius: 6px; margin-bottom: 8px; font-size: 13px;
-        }
+        .achievement-item, .stat-row, .leaderboard-row { display: flex; justify-content: space-between; align-items: center; background: var(--border-color); padding: 8px 10px; border-radius: 6px; margin-bottom: 8px; font-size: 13px; }
         .achievement-item.unlocked { border-left: 4px solid var(--accent-color); }
         .achievement-item.locked { opacity: 0.5; border-left: 4px solid #FF0D72; }
-        .close-modal-btn {
-            background: #FF0D72; color: white; border: none; padding: 10px; border-radius: 6px; font-weight: bold; cursor: pointer; width: 100%; margin-top: 15px; transition: opacity 0.2s;
-        }
-        .close-modal-btn:hover { opacity: 0.85; }
+        .close-modal-btn { background: #FF0D72; color: white; border: none; padding: 10px; border-radius: 6px; font-weight: bold; cursor: pointer; width: 100%; margin-top: 15px; }
     </style>
 </head>
 <body>
 
-    <button class="top-btn pause-btn" id="pauseBtn" title="Pausar Jogo">⏸️</button>
-    <button class="top-btn settings-btn" id="openSettings" title="Configurações">⚙️</button>
+    <button class="top-btn pause-btn" id="pauseBtn">⏸️</button>
+    <button class="top-btn settings-btn" id="openSettings">⚙️</button>
     <h1>BLOCK BLAST</h1>
     
     <div class="stats-container">
@@ -213,7 +186,6 @@
         <canvas id="gameCanvas" width="400" height="550"></canvas>
     </div>
 
-    <!-- Modal de Configurações -->
     <div class="modal-overlay" id="settingsModal">
         <div class="modal-content">
             <h2>PAINEL DE CONTROLE</h2>
@@ -227,10 +199,7 @@
             <div class="tab-pane active" id="tab-general">
                 <div class="setting-option">
                     <span>Efeitos Sonoros</span>
-                    <label class="switch">
-                        <input type="checkbox" id="soundToggle" checked>
-                        <span class="slider"></span>
-                    </label>
+                    <label class="switch"><input type="checkbox" id="soundToggle" checked><span class="slider"></span></label>
                 </div>
                 <div class="setting-option">
                     <span>Modo de Jogo</span>
@@ -250,20 +219,14 @@
                 </div>
             </div>
 
-            <div class="tab-pane" id="tab-achievements">
-                <div id="achievementsList"></div>
-            </div>
-
+            <div class="tab-pane" id="tab-achievements"><div id="achievementsList"></div></div>
             <div class="tab-pane" id="tab-stats">
                 <div class="stat-row"><span>Partidas Jogadas:</span> <strong id="statGames">0</strong></div>
                 <div class="stat-row"><span>Linhas Eliminadas:</span> <strong id="statLines">0</strong></div>
                 <div class="stat-row"><span>Maior Combo:</span> <strong id="statMaxCombo">0x</strong></div>
                 <div class="stat-row"><span>Dinamites Detonadas:</span> <strong id="statBombs">0</strong></div>
             </div>
-
-            <div class="tab-pane" id="tab-leaderboard">
-                <div id="leaderboardList"></div>
-            </div>
+            <div class="tab-pane" id="tab-leaderboard"><div id="leaderboardList"></div></div>
 
             <button class="close-modal-btn" id="closeSettings">SALVAR & FECHAR</button>
         </div>
@@ -278,24 +241,18 @@
         const BOARD_OFFSET_X = 20; 
         const BOARD_OFFSET_Y = 20;
 
-        let score = 0;
-        let level = 1;
-        let comboStreak = 0; 
-        let isGameOver = false;
-        let isPaused = false;
+        let score = 0, level = 1, comboStreak = 0, isGameOver = false, isPaused = false;
         let highScore = localStorage.getItem('blockBlastHighScore') || 0;
         let isNewHighScore = false;
         let soundEnabled = localStorage.getItem('blockBlastSound') !== 'false';
         let currentTheme = localStorage.getItem('blockBlastTheme') || 'space';
         let gameMode = localStorage.getItem('blockBlastMode') || 'infinite';
-        let timeLeft = 60;
-        let timerInterval = null;
+        let timeLeft = 60, timerInterval = null;
 
         let stats = JSON.parse(localStorage.getItem('blockBlastStats')) || { games: 1, lines: 0, maxCombo: 0, bombs: 0 };
         let leaderboard = JSON.parse(localStorage.getItem('blockBlastLeaderboard')) || [
             { name: 'PRO', score: 2500 }, { name: 'TOP', score: 1800 }, { name: 'BOY', score: 1000 }, { name: 'NEW', score: 500 }, { name: 'YOU', score: 200 }
         ];
-
         let achievements = JSON.parse(localStorage.getItem('blockBlastAchievements')) || {
             combo2: { title: 'Primeiro Combo (2x)', unlocked: false },
             combo5: { title: 'Imparável (5x Combo)', unlocked: false },
@@ -334,20 +291,13 @@
             soundEnabled = document.getElementById('soundToggle').checked;
             currentTheme = document.getElementById('themeSelect').value;
             let newMode = document.getElementById('gameModeSelect').value;
-            
             localStorage.setItem('blockBlastSound', soundEnabled);
             localStorage.setItem('blockBlastTheme', currentTheme);
-            
             if (newMode !== gameMode) {
-                gameMode = newMode;
-                localStorage.setItem('blockBlastMode', gameMode);
-                setupGameMode();
-                resetGame();
+                gameMode = newMode; localStorage.setItem('blockBlastMode', gameMode);
+                setupGameMode(); resetGame();
             }
-
-            applyTheme(currentTheme);
-            modal.classList.remove('open');
-            isPaused = false;
+            applyTheme(currentTheme); modal.classList.remove('open'); isPaused = false;
         });
 
         function setupGameMode() {
@@ -367,17 +317,8 @@
                 if (!isGameOver && !isPaused && gameMode === 'timeattack') {
                     timeLeft--;
                     document.getElementById('scoreDisplay').innerText = timeLeft + 's';
-                    
-                    // Aviso sonoro rítmico nos últimos 10 segundos
-                    if (timeLeft <= 10 && timeLeft > 0) {
-                        playSound('tick');
-                    }
-
-                    if (timeLeft <= 0) {
-                        isGameOver = true;
-                        playSound('gameover');
-                        clearInterval(timerInterval);
-                    }
+                    if (timeLeft <= 10 && timeLeft > 0) playSound('tick');
+                    if (timeLeft <= 0) { isGameOver = true; playSound('gameover'); clearInterval(timerInterval); }
                 }
             }, 1000);
         }
@@ -474,9 +415,7 @@
             } catch(e) {}
         }
 
-        let particles = [];
-        let flashingCells = []; 
-
+        let particles = [], flashingCells = []; 
         class Particle {
             constructor(x, y, color) {
                 this.x = x; this.y = y; this.color = color;
@@ -514,10 +453,7 @@
             return grid;
         }
         let board = createGrid(8);
-
-        let trayPieces = [];
-        let draggingPiece = null; 
-        let dragOffsetX = 0; let dragOffsetY = 0; 
+        let trayPieces = [], draggingPiece = null, dragOffsetX = 0, dragOffsetY = 0; 
 
         function generateTrayPieces() {
             trayPieces = [];
@@ -526,11 +462,9 @@
                 const randomShape = availableShapes[Math.floor(Math.random() * availableShapes.length)];
                 const randomColorIndex = Math.floor(Math.random() * (JEWEL_COLORS.length - 1)) + 1;
                 const hasBomb = Math.random() < 0.15;
-
                 let piecePixelWidth = randomShape[0].length * TRAY_BLOCK_SIZE;
                 let slotCenter = ((canvas.width - 60) / 3) * i + ((canvas.width - 60) / 6);
                 let startX = slotCenter - (piecePixelWidth / 2);
-
                 trayPieces.push({ shape: randomShape, colorIndex: randomColorIndex, isBomb: hasBomb, homeX: startX, homeY: 430, x: startX, y: 430, isPlaced: false });
             }
             saveGame();
@@ -558,13 +492,12 @@
             return false;
         }
 
-        const mouse = { x: 0, y: 0, isDown: false };
-
-        canvas.addEventListener('mousedown', (e) => {
-            if (isPaused || isGameOver) return;
+        // Funções unificadas de Toque e Rato
+        function handleStart(clientX, clientY) {
+            if (isPaused) return;
             const rect = canvas.getBoundingClientRect();
-            const mouseX = e.clientX - rect.left;
-            const mouseY = e.clientY - rect.top;
+            const mouseX = clientX - rect.left;
+            const mouseY = clientY - rect.top;
 
             if (mouseX >= 335 && mouseX <= 385 && mouseY >= 445 && mouseY <= 495) {
                 if (gameMode === 'infinite' && score >= 50) {
@@ -581,7 +514,6 @@
                 return;
             }
 
-            mouse.isDown = true;
             for (let i = trayPieces.length - 1; i >= 0; i--) {
                 let p = trayPieces[i];
                 if (p.isPlaced) continue;
@@ -594,61 +526,77 @@
                     break;
                 }
             }
-        });
+        }
 
-        canvas.addEventListener('mousemove', (e) => {
-            if (isPaused) return;
+        function handleMove(clientX, clientY) {
+            if (isPaused || !draggingPiece) return;
             const rect = canvas.getBoundingClientRect();
-            mouse.x = e.clientX - rect.left; mouse.y = e.clientY - rect.top;
-            if (draggingPiece) { draggingPiece.x = mouse.x - dragOffsetX; draggingPiece.y = mouse.y - dragOffsetY; }
-        });
+            draggingPiece.x = (clientX - rect.left) - dragOffsetX;
+            draggingPiece.y = (clientY - rect.top) - dragOffsetY;
+        }
 
-        canvas.addEventListener('mouseup', () => {
-            if (isPaused) return;
-            mouse.isDown = false;
-            if (draggingPiece) {
-                let gridX = Math.round((draggingPiece.x - BOARD_OFFSET_X) / BLOCK_SIZE);
-                let gridY = Math.round((draggingPiece.y - BOARD_OFFSET_Y) / BLOCK_SIZE);
+        function handleEnd() {
+            if (isPaused || !draggingPiece) return;
+            let gridX = Math.round((draggingPiece.x - BOARD_OFFSET_X) / BLOCK_SIZE);
+            let gridY = Math.round((draggingPiece.y - BOARD_OFFSET_Y) / BLOCK_SIZE);
 
-                if (canPlacePiece(draggingPiece.shape, gridX, gridY)) {
-                    for (let y = 0; y < draggingPiece.shape.length; y++) {
-                        for (let x = 0; x < draggingPiece.shape[y].length; x++) {
-                            if (draggingPiece.shape[y][x] === 1) {
-                                board[gridY + y][gridX + x] = draggingPiece.colorIndex;
-                            }
-                        }
+            if (canPlacePiece(draggingPiece.shape, gridX, gridY)) {
+                for (let y = 0; y < draggingPiece.shape.length; y++) {
+                    for (let x = 0; x < draggingPiece.shape[y].length; x++) {
+                        if (draggingPiece.shape[y][x] === 1) board[gridY + y][gridX + x] = draggingPiece.colorIndex;
                     }
-
-                    if (draggingPiece.isBomb) {
-                        playSound('bomb');
-                        stats.bombs++;
-                        for (let dy = -1; dy <= 1; dy++) {
-                            for (let dx = -1; dx <= 1; dx++) {
-                                let bx = gridX + dx, by = gridY + dy;
-                                if (bx >= 0 && bx < 8 && by >= 0 && by < 8) {
-                                    board[by][bx] = 0;
-                                    spawnParticles(BOARD_OFFSET_X + bx * BLOCK_SIZE + BLOCK_SIZE/2, BOARD_OFFSET_Y + by * BLOCK_SIZE + BLOCK_SIZE/2, '#FF5722');
-                                }
-                            }
-                        }
-                        showPopupMessage("BOOM! DINAMITE DETONADA 💣");
-                        checkAchievements();
-                    }
-
-                    draggingPiece.isPlaced = true;
-                    playSound('place');
-                    addScore(draggingPiece.shape.flat().reduce((a, b) => a + b, 0)); 
-                    checkAndClearLines(); 
-
-                    if (trayPieces.every(p => p.isPlaced)) generateTrayPieces();
-                    checkGameOver();
-                    saveGame();
-                } else {
-                    draggingPiece.x = draggingPiece.homeX; draggingPiece.y = draggingPiece.homeY;
                 }
-                draggingPiece = null;
+
+                if (draggingPiece.isBomb) {
+                    playSound('bomb');
+                    stats.bombs++;
+                    for (let dy = -1; dy <= 1; dy++) {
+                        for (let dx = -1; dx <= 1; dx++) {
+                            let bx = gridX + dx, by = gridY + dy;
+                            if (bx >= 0 && bx < 8 && by >= 0 && by < 8) {
+                                board[by][bx] = 0;
+                                spawnParticles(BOARD_OFFSET_X + bx * BLOCK_SIZE + BLOCK_SIZE/2, BOARD_OFFSET_Y + by * BLOCK_SIZE + BLOCK_SIZE/2, '#FF5722');
+                            }
+                        }
+                    }
+                    showPopupMessage("BOOM! DINAMITE DETONADA 💣");
+                    checkAchievements();
+                }
+
+                draggingPiece.isPlaced = true;
+                playSound('place');
+                addScore(draggingPiece.shape.flat().reduce((a, b) => a + b, 0)); 
+                checkAndClearLines(); 
+
+                if (trayPieces.every(p => p.isPlaced)) generateTrayPieces();
+                checkGameOver();
+                saveGame();
+            } else {
+                draggingPiece.x = draggingPiece.homeX; draggingPiece.y = draggingPiece.homeY;
             }
-        });
+            draggingPiece = null;
+        }
+
+        // Eventos de Rato
+        canvas.addEventListener('mousedown', (e) => handleStart(e.clientX, e.clientY));
+        canvas.addEventListener('mousemove', (e) => handleMove(e.clientX, e.clientY));
+        canvas.addEventListener('mouseup', () => handleEnd());
+
+        // Eventos de Toque (Mobile Touch Support)
+        canvas.addEventListener('touchstart', (e) => {
+            if (e.touches.length > 0) handleStart(e.touches[0].clientX, e.touches[0].clientY);
+            e.preventDefault();
+        }, { passive: false });
+
+        canvas.addEventListener('touchmove', (e) => {
+            if (e.touches.length > 0) handleMove(e.touches[0].clientX, e.touches[0].clientY);
+            e.preventDefault();
+        }, { passive: false });
+
+        canvas.addEventListener('touchend', (e) => {
+            handleEnd();
+            e.preventDefault();
+        }, { passive: false });
 
         function addScore(points) {
             if (gameMode === 'timeattack') {
@@ -656,7 +604,6 @@
                 document.getElementById('scoreDisplay').innerText = timeLeft + 's';
                 return;
             }
-
             score += points;
             let calculatedLevel = 1, pointsNeeded = 50, accumulatedPoints = 50;
             while (score >= accumulatedPoints) { calculatedLevel++; pointsNeeded *= 2; accumulatedPoints += pointsNeeded; }
@@ -676,7 +623,6 @@
         }
 
         const messagesSingle = ["BOA!", "MANDOU BEM!", "ISSO AÍ!", "SHOW!", "PERFEITO!"];
-        const messagesDouble = ["DUPLO EXPLOSIVO!", "MUITO BOM!", "ESTÁ VOANDO!"];
         const messagesMega = ["LENDÁRIO! 🌟", "MEGA COMBO! 🔥", "DESTRUIÇÃO TOTAL! 💥"];
 
         function showPopupMessage(text) {
@@ -838,7 +784,6 @@
             }
 
             ctx.save();
-            // Combo Streak Multicor (Arco-Íris se combo >= 3)
             if (comboStreak >= 3) {
                 let hue = (Date.now() / 10) % 360;
                 ctx.fillStyle = `hsla(${hue}, 100%, 50%, 0.4)`;
@@ -889,7 +834,7 @@
         function drawPauseScreen() {
             ctx.save(); ctx.fillStyle = 'rgba(26, 26, 46, 0.85)'; ctx.fillRect(0, 0, canvas.width, canvas.height);
             ctx.fillStyle = '#FF0D72'; ctx.font = 'bold 28px sans-serif'; ctx.textAlign = 'center'; ctx.fillText('JOGO PAUSADO', canvas.width / 2, canvas.height / 2 - 15);
-            ctx.fillStyle = '#ffffff'; ctx.font = '14px sans-serif'; ctx.fillText('Clique em ⏸️ ou ⚙️ para continuar', canvas.width / 2, canvas.height / 2 + 20);
+            ctx.fillStyle = '#ffffff'; ctx.font = '14px sans-serif'; ctx.fillText('Toque em ⏸️ ou ⚙️ para continuar', canvas.width / 2, canvas.height / 2 + 20);
             ctx.restore();
         }
 
